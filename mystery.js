@@ -15,7 +15,7 @@ function weird(x,y,z, mode)
     {
         z = 33;
     }    
-    else if( z < 42 )
+    else if( z < 33 )
     {
         if( mode == "mode" )
         {
