@@ -1,16 +1,21 @@
 // Core/NPM Modules
 const esprima = require("esprima");
-const faker   = require("faker");
-const fs      = require('fs');
-const Random  = require('random-js');
-const _       = require('lodash');
+const faker = require("faker");
+const fs = require('fs');
+const Random = require('random-js');
+const _ = require('lodash');
 const randexp = require('randexp');
 
 
 
 // Set options
-faker.locale  = "en";
-const options = { tokens: true, tolerant: true, loc: true, range: true };
+faker.locale = "en";
+const options = {
+    tokens: true,
+    tolerant: true,
+    loc: true,
+    range: true
+};
 
 
 
@@ -30,7 +35,7 @@ const engine = Random.engines.mt19937().autoSeed();
  * @property {'fileWithContent'|'fileExists'|'integer'|'string'|'phoneNumber'} kind       Type of the constraint.
  */
 class Constraint {
-    constructor(properties){
+    constructor(properties) {
         this.ident = properties.ident;
         this.expression = properties.expression;
         this.operator = properties.operator;
@@ -66,7 +71,9 @@ function constraints(filePath) {
 
             // Get function name and arguments
             let funcName = functionName(node);
-            let params = node.params.map(function(p) {return p.name});
+            let params = node.params.map(function (p) {
+                return p.name
+            });
 
             // Initialize function constraints
             functionConstraints[funcName] = {
@@ -75,11 +82,13 @@ function constraints(filePath) {
             };
 
             // Traverse function node.
-            traverse(node, function(child) {
+            traverse(node, function (child) {
 
                 // Handle equivalence expression for both integers and string
-                if(_.get(child, 'type') === 'BinaryExpression' && _.includes(['!=', '!==', '==', '==='], _.get(child, 'operator'))) {
-                    if(_.get(child, 'left.type') === 'Identifier') {
+                if (_.get(child, 'type') === 'BinaryExpression' && _.includes(['!=', '!==', '==', '==='], _.get(child, 'operator'))) {
+
+                    // for normal equivalence
+                    if (_.get(child, 'left.type') === 'Identifier') {
 
                         // Get identifier
                         let ident = child.left.name;
@@ -100,25 +109,65 @@ function constraints(filePath) {
                                 ident: child.left.name,
                                 value: rightHand,
                                 funcName: funcName,
-                                kind: "integer",
-                                operator : child.operator,
+                                kind: "integer", // also works for kind = string
+                                operator: child.operator,
                                 expression: expression
                             }));
                             constraints.push(new Constraint({
                                 ident: child.left.name,
                                 value: match ? `'NEQ - ${match[1]}'` : NaN,
                                 funcName: funcName,
-                                kind: "integer",
-                                operator : child.operator,
+                                kind: "integer", // also works for kind = string
+                                operator: child.operator,
                                 expression: expression
                             }));
                         }
                     }
+
+                    // For equivalence in indexof function
+                    if (_.get(child, 'left.type') === 'CallExpression') {
+
+                        let x = child.left.callee.property.name;
+
+                        if (x == 'indexOf') {
+
+                            // Get identifier
+                            let ident = child.left.callee.object.name;
+
+                            // Get expression from original source code:
+                            let expression = buf.substring(child.range[0], child.range[1]);
+                            let rightHand = buf.substring(child.right.range[0], child.right.range[1]);
+
+                            let value = child.left.arguments[0].raw;
+
+                            if (_.includes(params, ident)) {
+                                // Push a new constraints
+                                let constraints = functionConstraints[funcName].constraints[ident];
+                                constraints.push(new Constraint({
+                                    ident: ident,
+                                    value: value,
+                                    funcName: funcName,
+                                    kind: "string",
+                                    operator: child.operator,
+                                    expression: expression
+                                }));
+                                // constraints.push(new Constraint({
+                                //     ident: ident,
+                                //     value: value
+                                //     funcName: funcName,
+                                //     kind: "string",
+                                //     operator: child.operator,
+                                //     expression: expression
+                                // }));
+                            }
+                        }
+                    }
+
                 }
 
                 // Handle greater expression
-                if(_.get(child, 'type') === 'BinaryExpression' && _.includes(['>', '>='], _.get(child, 'operator'))) {
-                    if(_.get(child, 'left.type') === 'Identifier') {
+                if (_.get(child, 'type') === 'BinaryExpression' && _.includes(['>', '>='], _.get(child, 'operator'))) {
+                    if (_.get(child, 'left.type') === 'Identifier') {
 
                         // Get identifier
                         let ident = child.left.name;
@@ -133,18 +182,18 @@ function constraints(filePath) {
                             let constraints = functionConstraints[funcName].constraints[ident];
                             constraints.push(new Constraint({
                                 ident: child.left.name,
-                                value: parseInt(rightHand)-1,
+                                value: parseInt(rightHand) - 1,
                                 funcName: funcName,
                                 kind: "integer",
-                                operator : child.operator,
+                                operator: child.operator,
                                 expression: expression
                             }));
                             constraints.push(new Constraint({
                                 ident: child.left.name,
-                                value: parseInt(rightHand)+1,
+                                value: parseInt(rightHand) + 1,
                                 funcName: funcName,
                                 kind: "integer",
-                                operator : child.operator,
+                                operator: child.operator,
                                 expression: expression
                             }));
                         }
@@ -152,8 +201,8 @@ function constraints(filePath) {
                 }
 
                 // Handle lesser expression
-                if(_.get(child, 'type') === 'BinaryExpression' && _.includes(['<', '<='], _.get(child, 'operator'))) {
-                    if(_.get(child, 'left.type') === 'Identifier') {
+                if (_.get(child, 'type') === 'BinaryExpression' && _.includes(['<', '<='], _.get(child, 'operator'))) {
+                    if (_.get(child, 'left.type') === 'Identifier') {
 
                         // Get identifier
                         let ident = child.left.name;
@@ -168,18 +217,18 @@ function constraints(filePath) {
                             let constraints = functionConstraints[funcName].constraints[ident];
                             constraints.push(new Constraint({
                                 ident: child.left.name,
-                                value: parseInt(rightHand)-1,
+                                value: parseInt(rightHand) - 1,
                                 funcName: funcName,
                                 kind: "integer",
-                                operator : child.operator,
+                                operator: child.operator,
                                 expression: expression
                             }));
                             constraints.push(new Constraint({
                                 ident: child.left.name,
-                                value: parseInt(rightHand)+1,
+                                value: parseInt(rightHand) + 1,
                                 funcName: funcName,
                                 kind: "integer",
-                                operator : child.operator,
+                                operator: child.operator,
                                 expression: expression
                             }));
                         }
@@ -187,13 +236,13 @@ function constraints(filePath) {
                 }
 
                 // Handle fs.readFileSync
-                if( child.type === "CallExpression" && child.callee.property && child.callee.property.name === "readFileSync" ) {
+                if (child.type === "CallExpression" && child.callee.property && child.callee.property.name === "readFileSync") {
 
                     // Get expression from original source code:
                     let expression = buf.substring(child.range[0], child.range[1]);
 
                     for (let p in params) {
-                        if( child.arguments[0].name === params[p] ) {
+                        if (child.arguments[0].name === params[p]) {
 
                             // Get identifier
                             let ident = params[p];
@@ -201,18 +250,18 @@ function constraints(filePath) {
                             // Push a new constraint
                             functionConstraints[funcName].constraints[ident].push(new Constraint({
                                 ident: params[p],
-                                value:  "'pathContent/file1'",
+                                value: "'pathContent/file1'",
                                 funcName: funcName,
                                 kind: "fileWithContent",
-                                operator : child.operator,
+                                operator: child.operator,
                                 expression: expression
                             }));
                             functionConstraints[funcName].constraints[ident].push(new Constraint({
                                 ident: params[p],
-                                value:  "'pathContent/someDir'",
+                                value: "'pathContent/someDir'",
                                 funcName: funcName,
                                 kind: "fileWithContent",
-                                operator : child.operator,
+                                operator: child.operator,
                                 expression: expression
                             }));
                         }
@@ -269,7 +318,7 @@ function functionName(node) {
  * @returns {Number}                  Integer satisfying constraints.
  */
 function createConcreteIntegerValue(constraintValue, greaterThan) {
-    if( greaterThan ) return Random.integer(constraintValue + 1, constraintValue + 10)(engine);
+    if (greaterThan) return Random.integer(constraintValue + 1, constraintValue + 10)(engine);
     else return Random.integer(constraintValue - 10, constraintValue - 1)(engine);
 }
 

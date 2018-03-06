@@ -6,34 +6,42 @@ try { subject.inc(1, undefined); } catch (e) {}
 try { subject.inc(1, NaN); } catch (e) {} 
 try { subject.weird(6, -1, 41, "strict"); } catch (e) {} 
 try { subject.weird(6, -1, 41, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(6, -1, 41, "werw"); } catch (e) {} 
 try { subject.weird(6, -1, 41, "strict"); } catch (e) {} 
 try { subject.weird(6, -1, 41, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(6, -1, 43, "strict"); } catch (e) {} 
 try { subject.weird(6, -1, 43, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(6, -1, 43, "werw"); } catch (e) {} 
 try { subject.weird(6, -1, 43, "strict"); } catch (e) {} 
 try { subject.weird(6, -1, 43, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(6, 1, 41, "strict"); } catch (e) {} 
 try { subject.weird(6, 1, 41, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(6, 1, 41, "werw"); } catch (e) {} 
 try { subject.weird(6, 1, 41, "strict"); } catch (e) {} 
 try { subject.weird(6, 1, 41, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(6, 1, 43, "strict"); } catch (e) {} 
 try { subject.weird(6, 1, 43, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(6, 1, 43, "werw"); } catch (e) {} 
 try { subject.weird(6, 1, 43, "strict"); } catch (e) {} 
 try { subject.weird(6, 1, 43, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(8, -1, 41, "strict"); } catch (e) {} 
 try { subject.weird(8, -1, 41, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(8, -1, 41, "werw"); } catch (e) {} 
 try { subject.weird(8, -1, 41, "strict"); } catch (e) {} 
 try { subject.weird(8, -1, 41, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(8, -1, 43, "strict"); } catch (e) {} 
 try { subject.weird(8, -1, 43, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(8, -1, 43, "werw"); } catch (e) {} 
 try { subject.weird(8, -1, 43, "strict"); } catch (e) {} 
 try { subject.weird(8, -1, 43, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(8, 1, 41, "strict"); } catch (e) {} 
 try { subject.weird(8, 1, 41, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(8, 1, 41, "werw"); } catch (e) {} 
 try { subject.weird(8, 1, 41, "strict"); } catch (e) {} 
 try { subject.weird(8, 1, 41, 'NEQ - strict'); } catch (e) {} 
 try { subject.weird(8, 1, 43, "strict"); } catch (e) {} 
 try { subject.weird(8, 1, 43, 'NEQ - strict'); } catch (e) {} 
+try { subject.weird(8, 1, 43, "werw"); } catch (e) {} 
 try { subject.weird(8, 1, 43, "strict"); } catch (e) {} 
 try { subject.weird(8, 1, 43, 'NEQ - strict'); } catch (e) {} 
 try{
