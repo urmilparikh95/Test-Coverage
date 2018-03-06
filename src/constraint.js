@@ -109,7 +109,7 @@ function constraints(filePath) {
                                 ident: child.left.name,
                                 value: rightHand,
                                 funcName: funcName,
-                                kind: "integer", // also works for kind = string
+                                kind: match ? "string" : "integer",
                                 operator: child.operator,
                                 expression: expression
                             }));
@@ -117,7 +117,7 @@ function constraints(filePath) {
                                 ident: child.left.name,
                                 value: match ? `'NEQ - ${match[1]}'` : NaN,
                                 funcName: funcName,
-                                kind: "integer", // also works for kind = string
+                                kind: match ? "string" : "integer",
                                 operator: child.operator,
                                 expression: expression
                             }));
@@ -125,41 +125,36 @@ function constraints(filePath) {
                     }
 
                     // For equivalence in indexof function
-                    if (_.get(child, 'left.type') === 'CallExpression') {
+                    if (_.get(child, 'left.type') === 'CallExpression' && child.left.callee.property && child.left.callee.property.name === "indexOf") {
 
-                        let x = child.left.callee.property.name;
+                        // Get identifier
+                        let ident = child.left.callee.object.name;
 
-                        if (x == 'indexOf') {
+                        // Get expression from original source code:
+                        let expression = buf.substring(child.range[0], child.range[1]);
+                        let rightHand = buf.substring(child.right.range[0], child.right.range[1]);
 
-                            // Get identifier
-                            let ident = child.left.callee.object.name;
+                        let value = child.left.arguments[0].raw;
 
-                            // Get expression from original source code:
-                            let expression = buf.substring(child.range[0], child.range[1]);
-                            let rightHand = buf.substring(child.right.range[0], child.right.range[1]);
-
-                            let value = child.left.arguments[0].raw;
-
-                            if (_.includes(params, ident)) {
-                                // Push a new constraints
-                                let constraints = functionConstraints[funcName].constraints[ident];
-                                constraints.push(new Constraint({
-                                    ident: ident,
-                                    value: value,
-                                    funcName: funcName,
-                                    kind: "string",
-                                    operator: child.operator,
-                                    expression: expression
-                                }));
-                                // constraints.push(new Constraint({
-                                //     ident: ident,
-                                //     value: value
-                                //     funcName: funcName,
-                                //     kind: "string",
-                                //     operator: child.operator,
-                                //     expression: expression
-                                // }));
-                            }
+                        if (_.includes(params, ident)) {
+                            // Push a new constraints
+                            let constraints = functionConstraints[funcName].constraints[ident];
+                            constraints.push(new Constraint({
+                                ident: ident,
+                                value: value,
+                                funcName: funcName,
+                                kind: "string",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                            // constraints.push(new Constraint({
+                            //     ident: ident,
+                            //     value: value
+                            //     funcName: funcName,
+                            //     kind: "string",
+                            //     operator: child.operator,
+                            //     expression: expression
+                            // }));
                         }
                     }
 
