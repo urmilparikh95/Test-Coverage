@@ -77,7 +77,7 @@ function constraints(filePath) {
             // Traverse function node.
             traverse(node, function(child) {
 
-                // Handle equivalence expression
+                // Handle equivalence expression for both integers and string
                 if(_.get(child, 'type') === 'BinaryExpression' && _.includes(['!=', '!==', '==', '==='], _.get(child, 'operator'))) {
                     if(_.get(child, 'left.type') === 'Identifier') {
 
@@ -90,6 +90,7 @@ function constraints(filePath) {
 
                         // Test to see if right hand is a string
                         let match = rightHand.match(/^['"](.*)['"]$/);
+                        //console.log("\nident = " +  ident + "\nexpression = " + expression + "\nrighthand = " + rightHand + "\nmatch = " + match);
 
                         if (_.includes(params, _.get(child, 'left.name'))) {
 
@@ -106,6 +107,76 @@ function constraints(filePath) {
                             constraints.push(new Constraint({
                                 ident: child.left.name,
                                 value: match ? `'NEQ - ${match[1]}'` : NaN,
+                                funcName: funcName,
+                                kind: "integer",
+                                operator : child.operator,
+                                expression: expression
+                            }));
+                        }
+                    }
+                }
+
+                // Handle greater expression
+                if(_.get(child, 'type') === 'BinaryExpression' && _.includes(['>', '>='], _.get(child, 'operator'))) {
+                    if(_.get(child, 'left.type') === 'Identifier') {
+
+                        // Get identifier
+                        let ident = child.left.name;
+
+                        // Get expression from original source code:
+                        let expression = buf.substring(child.range[0], child.range[1]);
+                        let rightHand = buf.substring(child.right.range[0], child.right.range[1]);
+
+                        if (_.includes(params, _.get(child, 'left.name'))) {
+
+                            // Push a new constraints
+                            let constraints = functionConstraints[funcName].constraints[ident];
+                            constraints.push(new Constraint({
+                                ident: child.left.name,
+                                value: parseInt(rightHand)-1,
+                                funcName: funcName,
+                                kind: "integer",
+                                operator : child.operator,
+                                expression: expression
+                            }));
+                            constraints.push(new Constraint({
+                                ident: child.left.name,
+                                value: parseInt(rightHand)+1,
+                                funcName: funcName,
+                                kind: "integer",
+                                operator : child.operator,
+                                expression: expression
+                            }));
+                        }
+                    }
+                }
+
+                // Handle lesser expression
+                if(_.get(child, 'type') === 'BinaryExpression' && _.includes(['<', '<='], _.get(child, 'operator'))) {
+                    if(_.get(child, 'left.type') === 'Identifier') {
+
+                        // Get identifier
+                        let ident = child.left.name;
+
+                        // Get expression from original source code:
+                        let expression = buf.substring(child.range[0], child.range[1]);
+                        let rightHand = buf.substring(child.right.range[0], child.right.range[1]);
+
+                        if (_.includes(params, _.get(child, 'left.name'))) {
+
+                            // Push a new constraints
+                            let constraints = functionConstraints[funcName].constraints[ident];
+                            constraints.push(new Constraint({
+                                ident: child.left.name,
+                                value: parseInt(rightHand)-1,
+                                funcName: funcName,
+                                kind: "integer",
+                                operator : child.operator,
+                                expression: expression
+                            }));
+                            constraints.push(new Constraint({
+                                ident: child.left.name,
+                                value: parseInt(rightHand)+1,
                                 funcName: funcName,
                                 kind: "integer",
                                 operator : child.operator,
