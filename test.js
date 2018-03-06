@@ -1,4 +1,4 @@
-let subject = require('/Users/gameweld/classes/519/workshops/TestGeneration/subject.js')
+let subject = require('/Users/urmilparikh/csc519_testgeneration/TestGeneration/subject.js')
 let mock = require('mock-fs');
 try { subject.inc('', undefined); } catch (e) {} 
 try { subject.inc('', NaN); } catch (e) {} 
