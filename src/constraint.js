@@ -232,7 +232,6 @@ function constraints(filePath) {
 
                 // Handle fs.readFileSync
                 if (child.type === "CallExpression" && child.callee.property && child.callee.property.name === "readFileSync") {
-
                     // Get expression from original source code:
                     let expression = buf.substring(child.range[0], child.range[1]);
 
@@ -256,6 +255,78 @@ function constraints(filePath) {
                                 value: "'pathContent/someDir'",
                                 funcName: funcName,
                                 kind: "fileWithContent",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                        }
+                    }
+                }
+
+                // Handle fs.existsSync
+                if (child.type === "CallExpression" && child.callee.property && child.callee.property.name === "existsSync") {
+                    // Get expression from original source code:
+                    let expression = buf.substring(child.range[0], child.range[1]);
+
+                    for (let p in params) {
+                        if (child.arguments[0].name === params[p]) {
+
+                            // Get identifier
+                            let ident = params[p];
+
+                            // Push a new constraint
+                            functionConstraints[funcName].constraints[ident].push(new Constraint({
+                                ident: params[p],
+                                value: "'emptyDir'",
+                                funcName: funcName,
+                                kind: "fileExists",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                            functionConstraints[funcName].constraints[ident].push(new Constraint({
+                                ident: params[p],
+                                value: "'nonEmptyDir'",
+                                funcName: funcName,
+                                kind: "fileExists",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                            functionConstraints[funcName].constraints[ident].push(new Constraint({
+                                ident: params[p],
+                                value: "'file'",
+                                funcName: funcName,
+                                kind: "fileExists",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                        }
+                    }
+                }
+
+                // Handle fs.readdirSync
+                if (child.type === "CallExpression" && child.callee.property && child.callee.property.name === "readdirSync") {
+                    // Get expression from original source code:
+                    let expression = buf.substring(child.range[0], child.range[1]);
+
+                    for (let p in params) {
+                        if (child.arguments[0].name === params[p]) {
+
+                            // Get identifier
+                            let ident = params[p];
+
+                            // Push a new constraint
+                            functionConstraints[funcName].constraints[ident].push(new Constraint({
+                                ident: params[p],
+                                value: "'emptyDir'",
+                                funcName: funcName,
+                                kind: "fileExists",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                            functionConstraints[funcName].constraints[ident].push(new Constraint({
+                                ident: params[p],
+                                value: "'nonEmptyDir'",
+                                funcName: funcName,
+                                kind: "fileExists",
                                 operator: child.operator,
                                 expression: expression
                             }));
