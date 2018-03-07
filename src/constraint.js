@@ -328,7 +328,7 @@ function constraints(filePath) {
                 }
 
                 // Handle phone-number length
-                if (child.type === "ForStatement") {
+                if (child.type === "ForStatement" && funcName === "format") {
 
                     let expression = buf.substring(child.range[0], child.range[1]);
 
@@ -341,7 +341,7 @@ function constraints(filePath) {
                             let constraints = functionConstraints[funcName].constraints[ident];
                             constraints.push(new Constraint({
                                 ident: ident,
-                                value: value,
+                                value: "'" + value + "'",
                                 funcName: funcName,
                                 kind: "string",
                                 operator: child.test.operator,
@@ -352,6 +352,9 @@ function constraints(filePath) {
                     });
 
                 }
+
+                // Handle options in format
+
 
 
 
