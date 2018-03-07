@@ -132,16 +132,48 @@ function constraints(filePath) {
 
                         // Get expression from original source code:
                         let expression = buf.substring(child.range[0], child.range[1]);
-                        let rightHand = buf.substring(child.right.range[0], child.right.range[1]);
 
-                        let value = child.left.arguments[0].raw;
+                        // Get Righthand value
+                        let rightHand = parseInt(child.right.value);
 
+                        // value in indexof
+                        let x = child.left.arguments[0].value;
+                        
+                        // generate text with that index value
+                        value = faker.lorem.words(rightHand + x.length).replace(/\s/g,'').substring(0,rightHand) + x; 
+                        
+                        while(value.indexOf(x) != rightHand){
+                            value = faker.lorem.words(rightHand + x.length).replace(/\s/g,'').substring(0,rightHand) + x; 
+                        }
+
+                        // Constraint for true branch
                         if (_.includes(params, ident)) {
                             // Push a new constraints
                             let constraints = functionConstraints[funcName].constraints[ident];
                             constraints.push(new Constraint({
                                 ident: ident,
-                                value: value,
+                                value: "'" + value + "'",
+                                funcName: funcName,
+                                kind: "string",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                        }
+
+                        // generate text which doesn't match that index value
+                        value = faker.lorem.words(rightHand + x.length).replace(/\s/g,'').substring(0,rightHand + x.length);
+                        
+                        while(value.indexOf(x) == rightHand){
+                            value = faker.lorem.words(rightHand + x.length).replace(/\s/g,'').substring(0,rightHand + x.length); 
+                        }
+
+                        // Constraint for false branch
+                        if (_.includes(params, ident)) {
+                            // Push a new constraints
+                            let constraints = functionConstraints[funcName].constraints[ident];
+                            constraints.push(new Constraint({
+                                ident: ident,
+                                value: "'" + value + "'",
                                 funcName: funcName,
                                 kind: "string",
                                 operator: child.operator,
