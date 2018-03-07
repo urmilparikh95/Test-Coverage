@@ -99,7 +99,6 @@ function constraints(filePath) {
 
                         // Test to see if right hand is a string
                         let match = rightHand.match(/^['"](.*)['"]$/);
-                        //console.log("\nident = " +  ident + "\nexpression = " + expression + "\nrighthand = " + rightHand + "\nmatch = " + match);
 
                         // if variable is in params
                         if (_.includes(params, _.get(child, 'left.name'))) {
@@ -364,7 +363,7 @@ function constraints(filePath) {
                 }
 
                 // Handle options in format
-                if (child.type === "IfStatement" && child.test.type === "LogicalExpression" && child.test.operator === "||" && funcName === "format") {           
+                if (child.type === "IfStatement" && child.test.type === "LogicalExpression" && child.test.operator === "||" && funcName === "format") {
                     let expression = buf.substring(child.range[0], child.range[1]);
                     let ident = child.test.left.argument.name;
 
@@ -374,10 +373,10 @@ function constraints(filePath) {
                         let constraints = functionConstraints[funcName].constraints[ident];
                         constraints.push(new Constraint({
                             ident: ident,
-                            value: null,
+                            value: "''",
                             funcName: funcName,
                             kind: "string",
-                            operator: child.operator,
+                            operator: child.test.left.operator,
                             expression: expression
                         }));
                     }
@@ -394,7 +393,7 @@ function constraints(filePath) {
                             value: JSON.stringify(format_options),
                             funcName: funcName,
                             kind: "string",
-                            operator: child.operator,
+                            operator: child.test.left.operator,
                             expression: expression
                         }));
                     }
@@ -410,7 +409,7 @@ function constraints(filePath) {
                             value: JSON.stringify(format_options),
                             funcName: funcName,
                             kind: "string",
-                            operator: child.operator,
+                            operator: child.test.right.operator,
                             expression: expression
                         }));
                     }
@@ -426,12 +425,46 @@ function constraints(filePath) {
                             value: JSON.stringify(format_options),
                             funcName: funcName,
                             kind: "string",
-                            operator: child.operator,
+                            operator: child.test.right.operator,
                             expression: expression
                         }));
                     }
+                }
 
+                // Handle area code if statement
+                if (child.type === "IfStatement" && funcName === "blackListNumber" && child.test.type === 'BinaryExpression') {
+                    let expression = buf.substring(child.range[0], child.range[1]);
+                    let ident = params[0];
+                    let value = child.test.right.value;
+                    let rnd_phone_no = faker.phone.phoneNumberFormat();
 
+                    // get a phone number with area code not equal to value
+                    while(rnd_phone_no.substring(0,3) == value){
+                        rnd_phone_no = faker.phone.phoneNumberFormat();
+                    }
+
+                    // Constraint with phonenumber area code not equal to value
+                    // Push a new constraints
+                    let constraints = functionConstraints[funcName].constraints[ident];
+                    constraints.push(new Constraint({
+                        ident: ident,
+                        value: "'" + rnd_phone_no + "'",
+                        funcName: funcName,
+                        kind: "phoneNumber",
+                        operator: child.test.operator,
+                        expression: expression
+                    }));
+
+                    // Constraint with phonenumber area code equal to value
+                    // Push a new constraints
+                    constraints.push(new Constraint({
+                        ident: ident,
+                        value: "'" + value + rnd_phone_no.substring(3) + "'",
+                        funcName: funcName,
+                        kind: "phoneNumber",
+                        operator: child.test.operator,
+                        expression: expression
+                    }));
                 }
 
             });
