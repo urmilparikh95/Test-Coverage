@@ -235,6 +235,7 @@ function constraints(filePath) {
                             let ident = params[p];
 
                             // Push a new constraint
+                            // constraint for file with content
                             functionConstraints[funcName].constraints[ident].push(new Constraint({
                                 ident: params[p],
                                 value: "'pathContent/file1'",
@@ -248,6 +249,15 @@ function constraints(filePath) {
                                 value: "'pathContent/someDir'",
                                 funcName: funcName,
                                 kind: "fileWithContent",
+                                operator: child.operator,
+                                expression: expression
+                            }));
+                            // new constraint for file without content
+                            functionConstraints[funcName].constraints[ident].push(new Constraint({
+                                ident: params[p],
+                                value: "'file'",
+                                funcName: funcName,
+                                kind: "fileExists",
                                 operator: child.operator,
                                 expression: expression
                             }));
@@ -343,7 +353,7 @@ function constraints(filePath) {
                                 ident: ident,
                                 value: "'" + value + "'",
                                 funcName: funcName,
-                                kind: "string",
+                                kind: "phoneNumber",
                                 operator: child.test.operator,
                                 expression: expression
                             }));
@@ -354,9 +364,75 @@ function constraints(filePath) {
                 }
 
                 // Handle options in format
+                if (child.type === "IfStatement" && child.test.type === "LogicalExpression" && child.test.operator === "||" && funcName === "format") {           
+                    let expression = buf.substring(child.range[0], child.range[1]);
+                    let ident = child.test.left.argument.name;
+
+                    // Constraint for null options
+                    if (_.includes(params, ident)) {
+                        // Push a new constraints
+                        let constraints = functionConstraints[funcName].constraints[ident];
+                        constraints.push(new Constraint({
+                            ident: ident,
+                            value: null,
+                            funcName: funcName,
+                            kind: "string",
+                            operator: child.operator,
+                            expression: expression
+                        }));
+                    }
+
+                    let parameter = child.test.right.argument.property.name;
+                    let format_options = {}
+
+                    // Constraint for options without the parameter
+                    if (_.includes(params, ident)) {
+                        // Push a new constraints
+                        let constraints = functionConstraints[funcName].constraints[ident];
+                        constraints.push(new Constraint({
+                            ident: ident,
+                            value: JSON.stringify(format_options),
+                            funcName: funcName,
+                            kind: "string",
+                            operator: child.operator,
+                            expression: expression
+                        }));
+                    }
+
+                    format_options[parameter] = true;
+
+                    // Constraint for options with the parameter = true
+                    if (_.includes(params, ident)) {
+                        // Push a new constraints
+                        let constraints = functionConstraints[funcName].constraints[ident];
+                        constraints.push(new Constraint({
+                            ident: ident,
+                            value: JSON.stringify(format_options),
+                            funcName: funcName,
+                            kind: "string",
+                            operator: child.operator,
+                            expression: expression
+                        }));
+                    }
+
+                    format_options[parameter] = false;
+
+                    // Constraint for options with the parameter = false
+                    if (_.includes(params, ident)) {
+                        // Push a new constraints
+                        let constraints = functionConstraints[funcName].constraints[ident];
+                        constraints.push(new Constraint({
+                            ident: ident,
+                            value: JSON.stringify(format_options),
+                            funcName: funcName,
+                            kind: "string",
+                            operator: child.operator,
+                            expression: expression
+                        }));
+                    }
 
 
-
+                }
 
             });
 
