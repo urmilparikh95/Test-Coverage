@@ -545,5 +545,5 @@ try{
 	mock.restore();
 } catch(e) {}
 try { subject.normalize(''); } catch (e) {} 
-try { subject.format('', '', ''); } catch (e) {} 
+try { subject.format(755-180-1503, '', ''); } catch (e) {} 
 try { subject.blackListNumber(''); } catch (e) {} 

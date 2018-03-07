@@ -101,6 +101,7 @@ function constraints(filePath) {
                         let match = rightHand.match(/^['"](.*)['"]$/);
                         //console.log("\nident = " +  ident + "\nexpression = " + expression + "\nrighthand = " + rightHand + "\nmatch = " + match);
 
+                        // if variable is in params
                         if (_.includes(params, _.get(child, 'left.name'))) {
 
                             // Push a new constraints
@@ -147,14 +148,6 @@ function constraints(filePath) {
                                 operator: child.operator,
                                 expression: expression
                             }));
-                            // constraints.push(new Constraint({
-                            //     ident: ident,
-                            //     value: value
-                            //     funcName: funcName,
-                            //     kind: "string",
-                            //     operator: child.operator,
-                            //     expression: expression
-                            // }));
                         }
                     }
 
@@ -333,6 +326,34 @@ function constraints(filePath) {
                         }
                     }
                 }
+
+                // Handle phone-number length
+                if (child.type === "ForStatement") {
+
+                    let expression = buf.substring(child.range[0], child.range[1]);
+
+                    traverse(child.init, function (subchild) {
+                        if (_.get(subchild, 'type') === 'Identifier' && _.includes(params, subchild.name)) {
+                            let ident = subchild.name;
+                            let value = faker.phone.phoneNumberFormat();
+
+                            //Push a new constraints
+                            let constraints = functionConstraints[funcName].constraints[ident];
+                            constraints.push(new Constraint({
+                                ident: ident,
+                                value: value,
+                                funcName: funcName,
+                                kind: "string",
+                                operator: child.test.operator,
+                                expression: expression
+                            }));
+
+                        }
+                    });
+
+                }
+
+
 
             });
 
